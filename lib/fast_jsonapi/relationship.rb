@@ -47,8 +47,8 @@ module FastJsonapi
         output_hash[key] = {}
         output_hash[key][:data] = ids_hash_from_record_and_relationship(record, serialization_params) || empty_case unless lazy_load_data && !included
 
-        add_meta_hash(record, serialization_params, output_hash) if meta.present?
-        add_links_hash(record, serialization_params, output_hash) if links.present?
+        add_meta_hash(record, serialization_params, output_hash) if meta && !meta.empty?
+        add_links_hash(record, serialization_params, output_hash) if links && !links.empty?
       end
     end
 
@@ -59,7 +59,7 @@ module FastJsonapi
     end
 
     def include_relationship?(record, serialization_params)
-      if conditional_proc.present?
+      if conditional_proc
         FastJsonapi.call_proc(conditional_proc, record, serialization_params)
       else
         true
@@ -128,7 +128,7 @@ module FastJsonapi
     end
 
     def id_hash(id, record_type, default_return = false)
-      if id.present?
+      if id && !id.to_s.empty?
         { id: id.to_s, type: record_type }
       else
         default_return ? { id: nil, type: record_type } : nil
@@ -136,7 +136,7 @@ module FastJsonapi
     end
 
     def fetch_id(record, params)
-      if object_block.present?
+      if object_block
         object = FastJsonapi.call_proc(object_block, record, params)
         return object.map { |item| item.public_send(id_method_name) } if object.respond_to? :map
 
@@ -164,7 +164,7 @@ module FastJsonapi
     end
 
     def run_key_transform(input)
-      if transform_method.present?
+      if transform_method && !transform_method.empty?
         input.to_s.send(*transform_method).to_sym
       else
         input.to_sym

@@ -19,7 +19,7 @@ module FastJsonapi
     end
 
     def conditionally_allowed?(record, serialization_params)
-      if conditional_proc.present?
+      if conditional_proc
         FastJsonapi.call_proc(conditional_proc, record, serialization_params)
       else
         true
