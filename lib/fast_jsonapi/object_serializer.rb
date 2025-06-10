@@ -5,6 +5,7 @@ require 'active_support/time'
 require 'active_support/concern'
 require 'active_support/inflector'
 require 'active_support/core_ext/numeric/time'
+require 'active_support/core_ext/object/blank'
 require 'fast_jsonapi/helpers'
 require 'fast_jsonapi/attribute'
 require 'fast_jsonapi/relationship'
@@ -76,7 +77,7 @@ module FastJsonapi
     private
 
     def process_options(options)
-      @fieldsets = deep_symbolize(options[:fields].presence || {})
+      @fieldsets = deep_symbolize(options[:fields] || {})
       @params = {}
 
       return if options.blank?

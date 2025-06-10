@@ -157,7 +157,7 @@ module FastJsonapi
         includes_list.each_with_object({}) do |include_item, include_sets|
           include_base, include_remainder = include_item.to_s.split('.', 2)
           include_sets[include_base.to_sym] ||= Set.new
-          include_sets[include_base.to_sym] << include_remainder if include_remainder
+          include_sets[include_base.to_sym] << include_remainder.to_sym if include_remainder
         end
       end
 
@@ -193,7 +193,7 @@ module FastJsonapi
 
             known_included_objects << code
 
-            included_records << serializer.record_hash(inc_obj, fieldsets[record_type], includes_list, params)
+            included_records << serializer.record_hash(inc_obj, fieldsets[record_type], include_item.last, params)
           end
         end
       end
