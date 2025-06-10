@@ -103,9 +103,23 @@ module FastJsonapi
     def ids_hash_from_record_and_relationship(record, params = {})
       initialize_static_serializer unless @initialized_static_serializer
 
-      return ids_hash(fetch_id(record, params), @static_record_type) if @static_record_type
+      # If we have a static record type and are not using object blocks,
+      # try to get IDs directly first
+      if @static_record_type && !object_block
+        id_result = fetch_id(record, params)
 
-      return unless associated_object = fetch_associated_object(record, params)
+        # If ID fetching returns valid results, use them
+        if id_result && (!id_result.respond_to?(:empty?) || !id_result.empty?)
+          return ids_hash(id_result, @static_record_type)
+        end
+
+        # If ID fetching returns empty results but we have an associated object,
+        # fall back to loading the actual objects (this handles the case where
+        # lazy_load_data is true but includes are specified)
+      end
+
+      associated_object = fetch_associated_object(record, params)
+      return unless associated_object
 
       if associated_object.respond_to? :map
         return associated_object.map do |object|
@@ -118,7 +132,9 @@ module FastJsonapi
 
     def id_hash_from_record(record, params)
       associated_record_type = record_type_for(record, params)
-      id_hash(record.public_send(id_method_name), associated_record_type)
+      serializer = serializer_for(record, params)
+      record_id = serializer.id_from_record(record, params)
+      id_hash(record_id, associated_record_type)
     end
 
     def ids_hash(ids, record_type)
