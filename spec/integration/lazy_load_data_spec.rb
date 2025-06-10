@@ -66,6 +66,10 @@ RSpec.describe JSONAPI::Serializer do
           "id" => user.uid,
           "type" => "user"
         })
+        
+        # Check that the user is also included in the included section
+        user_included = serialized["included"].find { |inc| inc["type"] == "user" && inc["id"] == user.uid }
+        expect(user_included).not_to be_nil, "User should be included in the included section"
       end
     end
 
